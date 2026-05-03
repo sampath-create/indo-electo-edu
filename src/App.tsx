@@ -32,6 +32,7 @@ function App() {
 
   const guidance = useMemo(
     () => getGuidance(state, region),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [state.age, state.citizen, state.registered, state.location, region],
   )
 
@@ -80,7 +81,7 @@ function App() {
               Answer a few questions to get the right next steps. Your inputs
               stay in this browser.
             </p>
-            <div className="guidance__box">
+            <div className="guidance__box" aria-live="polite">
               <h3>{guidance.title}</h3>
               <ul className="steps">
                 {guidance.steps.map((step) => (
@@ -125,10 +126,12 @@ function App() {
                 placeholder="Enter your age"
                 value={ageInput}
                 onChange={(event) => setAgeInput(event.target.value)}
+                aria-invalid={!ageIsValid && ageInput.trim() !== ''}
+                aria-describedby={!ageIsValid && ageInput.trim() !== '' ? 'age-error' : 'age-hint'}
               />
-              <p className="hint">Used only to check eligibility.</p>
+              <p id="age-hint" className="hint">Used only to check eligibility.</p>
               {ageInput.trim() !== '' && !ageIsValid && (
-                <p className="error">Enter a valid age between 0 and 120.</p>
+                <p id="age-error" className="error">Enter a valid age between 0 and 120.</p>
               )}
             </div>
             <div className="field">
@@ -186,7 +189,7 @@ function App() {
               Registered: {registered === 'unknown' ? 'not sure' : registered}
             </span>
             {state.location && <span className="pill">Location: saved</span>}
-            <button className="ghost" type="button" onClick={resetForm}>
+            <button className="ghost" type="button" onClick={resetForm} aria-label="Reset form fields">
               Reset
             </button>
           </div>
