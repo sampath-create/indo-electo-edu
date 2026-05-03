@@ -64,3 +64,4 @@ Environment variables:
 - Rules, deadlines, and accepted documents can vary by state and election type.
 - If anything is unclear, confirm details with official ECI guidance.
 - Do not store sensitive personal data unless required for an official process.
+# indo-electo-edu
