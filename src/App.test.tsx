@@ -22,6 +22,18 @@ describe('App', () => {
     const citizenSelect = screen.getByLabelText(/Indian citizen\?/i)
     fireEvent.change(citizenSelect, { target: { value: 'yes' } })
     
+    
     expect(screen.getByText('Not eligible yet')).toBeInTheDocument()
+  })
+
+  it('resets the form', () => {
+    render(<App />)
+    const ageInput = screen.getByLabelText(/Your age/i)
+    fireEvent.change(ageInput, { target: { value: '25' } })
+    expect(ageInput).toHaveValue(25)
+    
+    const resetButton = screen.getByRole('button', { name: /Reset form fields/i })
+    fireEvent.click(resetButton)
+    expect(ageInput).toHaveValue(null)
   })
 })

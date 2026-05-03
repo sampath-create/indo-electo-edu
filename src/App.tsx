@@ -1,7 +1,20 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, Suspense, lazy } from 'react'
 import './App.css'
 import { LocationInput } from './components/LocationInput'
-import { MapPanel } from './components/MapPanel'
+import {
+  EligibilitySection,
+  RegistrationSection,
+  TimelineSection,
+  VotingDaySection,
+  FAQSection,
+  NotesSection,
+} from './components/Sections'
+
+const MapPanel = lazy(() =>
+  import('./components/MapPanel').then((module) => ({
+    default: module.MapPanel,
+  }))
+)
 import { eciIndia } from './data/regions'
 import { getGuidance } from './flows/flowEngine'
 import { firebaseStatus } from './lib/firebase'
@@ -195,119 +208,14 @@ function App() {
           </div>
         </section>
 
-        <section className="panel">
-          <div className="panel__header">
-            <h2>Eligibility check</h2>
-            <p>These are the basic eligibility rules for India.</p>
-          </div>
-          <div className="card-grid">
-            <div className="card">
-              <h3>Core requirements</h3>
-              <ul className="steps">
-                {region.eligibility.notes.map((note) => (
-                  <li key={note}>{note}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="card">
-              <h3>If you are not eligible yet</h3>
-              <ul className="steps">
-                <li>You can register once you meet the minimum age.</li>
-                <li>Keep proof of age and address ready.</li>
-                <li>Check deadlines as your area announces elections.</li>
-              </ul>
-            </div>
-          </div>
-        </section>
+        <EligibilitySection region={region} />
+        <RegistrationSection region={region} />
+        <TimelineSection region={region} />
+        <VotingDaySection region={region} />
 
-        <section className="panel">
+        <section className="panel" aria-labelledby="location-aware-title">
           <div className="panel__header">
-            <h2>Registration guidance</h2>
-            <p>Pick the path that matches your situation.</p>
-          </div>
-          <div className="card-grid">
-            <div className="card">
-              <h3>New voter</h3>
-              <ul className="steps">
-                {region.registration.newVoter.map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="card">
-              <h3>Change of address</h3>
-              <ul className="steps">
-                {region.registration.changeAddress.map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="card">
-              <h3>Name missing from the list</h3>
-              <ul className="steps">
-                {region.registration.nameMissing.map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="card">
-              <h3>Documents to keep ready</h3>
-              <ul className="steps">
-                {region.registration.documents.map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        <section className="panel">
-          <div className="panel__header">
-            <h2>Election timeline</h2>
-            <p>A simple view of the main phases.</p>
-          </div>
-          <div className="timeline">
-            {region.timeline.map((phase) => (
-              <div key={phase.phase} className="timeline__item">
-                <h3>{phase.phase}</h3>
-                <ul className="steps">
-                  {phase.steps.map((step) => (
-                    <li key={step}>{step}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="panel">
-          <div className="panel__header">
-            <h2>Voting day guide</h2>
-            <p>What to bring and what to expect.</p>
-          </div>
-          <div className="card-grid two-col">
-            <div className="card">
-              <h3>Bring with you</h3>
-              <ul className="steps">
-                {region.votingDay.bring.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="card">
-              <h3>Steps at the polling station</h3>
-              <ul className="steps">
-                {region.votingDay.steps.map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        <section className="panel">
-          <div className="panel__header">
-            <h2>Location-aware support</h2>
+            <h2 id="location-aware-title">Location-aware support</h2>
             <p>
               When enabled, the assistant can show polling stations and nearby
               election offices.
@@ -334,39 +242,15 @@ function App() {
             </div>
             <div className="card map-card">
               <h3>Map preview</h3>
-              <MapPanel location={state.location} mapsEnabled={mapsEnabled} />
+              <Suspense fallback={<div>Loading map...</div>}>
+                <MapPanel location={state.location} mapsEnabled={mapsEnabled} />
+              </Suspense>
             </div>
           </div>
         </section>
 
-        <section className="panel">
-          <div className="panel__header">
-            <h2>Frequently asked questions</h2>
-            <p>Quick answers to common situations.</p>
-          </div>
-          <div className="faq">
-            {region.faq.map((item) => (
-              <details key={item.q}>
-                <summary>{item.q}</summary>
-                <p>{item.a}</p>
-              </details>
-            ))}
-          </div>
-        </section>
-
-        <section className="panel">
-          <div className="panel__header">
-            <h2>Important notes</h2>
-            <p>Keep these in mind before you act.</p>
-          </div>
-          <div className="card">
-            <ul className="steps">
-              {region.disclaimers.map((note) => (
-                <li key={note}>{note}</li>
-              ))}
-            </ul>
-          </div>
-        </section>
+        <FAQSection region={region} />
+        <NotesSection region={region} />
 
         <section className="panel next-step">
           <div className="panel__header">
