@@ -1,0 +1,7 @@
+Building using Dockerfile and deploying container to Cloud Run service [electiom-app] in project [electiom-495207] region [us-central1]
+Building and deploying new service...
+Validating configuration.....................done
+Uploading sources..................................done
+Building Container..................................................................................................................................................................................................................................................................................................................................................................................................................................................................................failed
+Deployment failed
+ERROR: (gcloud.run.deploy) Build failed; check build logs for details
