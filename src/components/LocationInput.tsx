@@ -19,53 +19,73 @@ export function LocationInput({
   onChange,
 }: LocationInputProps) {
   const inputRef = useRef<HTMLInputElement | null>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const elementRef = useRef<any>(null)
 
   useEffect(() => {
-    if (!mapsEnabled || !inputRef.current) {
+    if (!mapsEnabled) {
       return
     }
 
-    let listener: google.maps.MapsEventListener | null = null
     let disposed = false
 
-    loadMapsLibrary('places').then((places) => {
-      if (disposed || !inputRef.current) {
+    loadMapsLibrary('places').then((places: any) => {
+      if (disposed || !containerRef.current) {
         return
       }
 
-      const autocomplete = new places.Autocomplete(
-        inputRef.current,
-        {
-          types: ['geocode'],
-        },
-      )
+      // Hide the fallback input when maps are successfully loaded
+      if (inputRef.current) {
+        inputRef.current.style.display = 'none'
+      }
 
-      listener = autocomplete.addListener('place_changed', () => {
-        const place = autocomplete.getPlace()
-        const nextValue = place.formatted_address || place.name
-        if (nextValue) {
-          onChange(nextValue)
+      if ('PlaceAutocompleteElement' in places) {
+        const autocomplete = new places.PlaceAutocompleteElement()
+        autocomplete.id = id
+        if (placeholder) {
+          // Setting property or attribute based on component support
+          autocomplete.setAttribute('placeholder', placeholder)
         }
-      })
+        
+        containerRef.current.appendChild(autocomplete)
+        elementRef.current = autocomplete
+
+        autocomplete.addEventListener('gmp-placeselect', async (event: any) => {
+          const place = event.place
+          if (!place) return
+          await place.fetchFields({ fields: ['displayName', 'formattedAddress'] })
+          const nextValue = place.formattedAddress || place.displayName
+          if (nextValue) {
+            onChange(nextValue)
+          }
+        })
+      }
     })
 
     return () => {
       disposed = true
-      if (listener) {
-        listener.remove()
+      if (containerRef.current && elementRef.current) {
+        containerRef.current.removeChild(elementRef.current)
+        elementRef.current = null
+      }
+      if (inputRef.current) {
+        inputRef.current.style.display = 'block'
       }
     }
-  }, [mapsEnabled, onChange])
+  }, [mapsEnabled, onChange, id, placeholder])
 
   return (
-    <input
-      ref={inputRef}
-      id={id}
-      name={name}
-      type="text"
-      placeholder={placeholder}
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-    />
+    <div className="location-input-wrapper">
+      <input
+        ref={inputRef}
+        id={id}
+        name={name}
+        type="text"
+        placeholder={placeholder}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      />
+      <div ref={containerRef} className="autocomplete-container"></div>
+    </div>
   )
 }

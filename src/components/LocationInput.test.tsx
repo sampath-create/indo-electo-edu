@@ -4,9 +4,12 @@ import { LocationInput } from './LocationInput'
 
 vi.mock('../services/mapsLoader', () => ({
   loadMapsLibrary: vi.fn().mockResolvedValue({
-    Autocomplete: vi.fn().mockImplementation(() => ({
-      addListener: vi.fn(),
-    }))
+    PlaceAutocompleteElement: vi.fn().mockImplementation(() => {
+      const el = document.createElement('div');
+      el.setAttribute = vi.fn();
+      el.addEventListener = vi.fn();
+      return el;
+    })
   })
 }))
 
